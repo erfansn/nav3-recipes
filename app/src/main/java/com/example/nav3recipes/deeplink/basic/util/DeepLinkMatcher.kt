@@ -14,6 +14,8 @@ internal class DeepLinkMatcher<T : NavKey>(
      * Returns a [DeepLinkMatchResult] if this matches the pattern, returns null otherwise
      */
     fun match(): DeepLinkMatchResult<T>? {
+        if (request.uri.scheme != deepLinkPattern.uriPattern.scheme) return null
+        if (!request.uri.authority.equals(deepLinkPattern.uriPattern.authority, ignoreCase = true)) return null
         if (request.pathSegments.size != deepLinkPattern.pathSegments.size) return null
         // exact match (url does not contain any arguments)
         if (request.uri == deepLinkPattern.uriPattern)
@@ -48,9 +50,12 @@ internal class DeepLinkMatcher<T : NavKey>(
         // match queries (if any)
         request.queries.forEach { query ->
             val name = query.key
-            val queryStringParser = deepLinkPattern.queryValueParsers[name]
+            // If the pattern does not define this query parameter, ignore it.
+            // This prevents a NullPointerException.
+            val queryStringParser = deepLinkPattern.queryValueParsers[name]?: return@forEach
+            
             val queryParsedValue = try {
-                queryStringParser!!.invoke(query.value)
+                queryStringParser.invoke(query.value)
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG_LOG_ERROR, "Failed to parse query name:[$name] value:[${query.value}].", e)
                 return null

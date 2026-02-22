@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.animations.AnimatedActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
@@ -62,8 +63,10 @@ import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
+import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
+import com.example.nav3recipes.interop.InteropActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -98,6 +101,7 @@ private val recipes = listOf(
     Recipe("Common UI", CommonUiActivity::class.java),
     Recipe("Multiple Stacks", MultipleStacksActivity::class.java),
     Recipe("Conditional navigation", ConditionalActivity::class.java),
+    Recipe("Shared ViewModel", SharedViewModelActivity::class.java),
 
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
@@ -115,6 +119,9 @@ private val recipes = listOf(
     Heading("Deeplink"),
     Recipe("Parse Intent", CreateDeepLinkActivity::class.java),
     Recipe("Synthetic BackStack", AdvancedCreateDeepLinkActivity::class.java),
+
+    Heading("Interop"),
+    Recipe("Fragment and View Interop", InteropActivity::class.java),
 )
 
 class RecipePickerActivity : ComponentActivity() {
@@ -153,9 +160,9 @@ class RecipePickerActivity : ComponentActivity() {
                     is Recipe -> {
                         ListItem(
                             headlineContent = { Text(item.name) },
-                            modifier = Modifier.clickable {
+                            modifier = Modifier.clickable(onClick = dropUnlessResumed {
                                 item.start()
-                            }
+                            })
                         )
                     }
                     is Heading -> {
